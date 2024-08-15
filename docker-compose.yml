@@ -1,0 +1,8 @@
+services:
+  mail-tp:
+    image: ghcr.io/eben92/mail-tp:latest
+    restart: no
+    ports:
+      - 5870:5870
+    environment:
+      - SMTP_PORT=5870
