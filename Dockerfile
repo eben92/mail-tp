@@ -1,6 +1,7 @@
 FROM golang:1.23.0 AS builder
 
 ARG GITHUB_TOKEN
+ARG SMTP_PORT=2525
 
 WORKDIR /app 
 
@@ -14,9 +15,7 @@ RUN go mod download
 
 COPY . .
 
-# Build a statically linked Linux binary with no C dependencies or system library requirements, optimized for minimal size.
-# CGO_ENABLED=0 (disable CGo), GOOS=linux (target Linux OS), -a (rebuild all), -tags netgo (use pure Go net pkg), -ldflags '-w (omit debug info) -extldflags "-static"' (static linking), -o main (output file).
-RUN CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags '-w -extldflags "-static"' -o main ./cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags '-w -extldflags "-static"' -o main ./main.go
 
 RUN chmod +x /app/main
 
@@ -26,6 +25,6 @@ WORKDIR /root/
 
 COPY --from=builder /app/main .
 
-EXPOSE 50032
+EXPOSE 2525
 
 CMD ["./main"]
