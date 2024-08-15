@@ -22,7 +22,7 @@ func mailHandler(origin net.Addr, from string, to []string, data []byte) error {
 	msg, _ := mail.ReadMessage(bytes.NewReader(data))
 	subject := msg.Header.Get("Subject")
 
-	fmt.Printf("Received mail from %s to %s with subject %s", from, to[0], subject)
+	slog.Info("Received mail", "from: ", from, "to: ", to[0], "with subject: ", subject)
 	return nil
 }
 

@@ -1,30 +1,18 @@
 FROM golang:1.23.0 AS builder
 
-ARG GITHUB_TOKEN
-ARG SMTP_PORT=2525
+# Set destination for COPY
+WORKDIR /app
 
-WORKDIR /app 
-
+# Download Go modules
 COPY go.mod go.sum ./
-
-RUN echo "machine github.com login ${GITHUB_TOKEN} password x-oauth-basic" > ~/.netrc && \
-    chmod 600 ~/.netrc && \
-    git config --global url."https://".insteadOf git://
-
 RUN go mod download
 
-COPY . .
+# Copy the source code. Note the slash at the end, as explained in
+# https://docs.docker.com/reference/dockerfile/#copy
+COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags '-w -extldflags "-static"' -o main ./main.go
+# Build
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
-RUN chmod +x /app/main
-
-FROM alpine:latest
-
-WORKDIR /root/
-
-COPY --from=builder /app/main .
-
-EXPOSE 2525
-
+# Run
 CMD ["./main"]
